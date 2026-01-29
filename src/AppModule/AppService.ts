@@ -1,6 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-// Remove the top-level import to avoid 'window is not defined'
-// import { exportToSvg } from '@excalidraw/utils';
 import chokidar, { FSWatcher } from 'chokidar';
 import { JSDOM } from 'jsdom';
 import fs from 'node:fs';
@@ -56,9 +55,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       value: {
         load: async () => [],
         check: () => true,
-        add: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
+        add: () => { },
+        addEventListener: () => { },
+        removeEventListener: () => { },
       },
       writable: true,
     });
@@ -83,7 +82,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
         const baseName = path.parse(fileName).name;
 
         try {
-          const { exportToSvg } = await import('@excalidraw/utils');
+          const { exportToSvg } = await import('@excalidraw/utils'); // inline import to avoid 'window is not defined'
 
           // Use promises for better NestJS non-blocking performance
           const fileData = await fs.promises.readFile(filePath, 'utf8');
