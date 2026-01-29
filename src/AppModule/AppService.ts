@@ -14,14 +14,54 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
   private watcher: FSWatcher;
 
   constructor() {
-    // 1. Shim the environment immediately in the constructor
-    const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+    const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+      pretendToBeVisual: true,
+    });
+
     globalThis.window = dom.window as any;
     globalThis.document = dom.window.document;
     globalThis.Node = dom.window.Node;
     globalThis.Element = dom.window.Element;
     globalThis.HTMLElement = dom.window.HTMLElement;
     globalThis.devicePixelRatio = 1;
+
+    // Polyfill FontFace with the metadata Excalidraw's toCSS() needs
+    globalThis.FontFace = class FontFace {
+      family: string;
+      source: string | BufferSource;
+      descriptors: FontFaceDescriptors;
+      status: 'unloaded' | 'loading' | 'loaded' | 'error' = 'unloaded';
+
+      unicodeRange = '';
+      variant = 'normal';
+      featureSettings = 'normal';
+      variationSettings = 'normal';
+      display = 'auto';
+
+      constructor(family: string, source: string | BufferSource, descriptors: FontFaceDescriptors = {}) {
+        this.family = family;
+        this.source = source;
+        this.descriptors = descriptors;
+        // Ensure unicodeRange from descriptors is used if provided
+        this.unicodeRange = descriptors.unicodeRange || '';
+      }
+
+      async load() {
+        this.status = 'loaded';
+        return this;
+      }
+    } as any as typeof FontFace;
+
+    Object.defineProperty(globalThis.document, 'fonts', {
+      value: {
+        load: async () => [],
+        check: () => true,
+        add: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      },
+      writable: true,
+    });
   }
 
   onModuleInit() {
@@ -55,7 +95,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
               ...appState,
               viewBackgroundColor: 'transparent',
               exportBackground: false,
-              exportWithDarkMode: false,
+              exportWithDarkMode: true,
             },
             files: files || {}, // Use empty object, not null
           });
