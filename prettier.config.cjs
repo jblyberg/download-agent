@@ -1,0 +1,15 @@
+module.exports = {
+  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  printWidth: 120,
+  singleQuote: true,
+  semi: true,
+  tabWidth: 2,
+  useTabs: false,
+  trailingComma: 'all',
+  importOrderParserPlugins: ['typescript', 'decorators-legacy'],
+  importOrder: ['^@nestjs/(.*)$', '^@inkleaf/(.*)$', '<THIRD_PARTY_MODULES>', '^[./]'],
+  importOrderSeparation: false,
+  importOrderSortSpecifiers: true,
+  importOrderCaseInsensitive: true,
+  importOrderGroupNamespaceSpecifiers: true,
+};
