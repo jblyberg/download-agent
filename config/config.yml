@@ -1,0 +1,5 @@
+---
+excalidraw:
+  src_dir: "images/in"
+  dest_dir: "images/out"
+  svg_dir: "images/svg"
