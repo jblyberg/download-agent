@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable } from '@nestjs/common';
+import { CanvasRenderingContext2D } from 'canvas';
 import { JSDOM } from 'jsdom';
 import { FontFaceMocker } from './classes/FontFaceMocker';
 
@@ -20,7 +21,11 @@ export class WatcherService {
       Node: dom.window.Node,
       devicePixelRatio: 1,
       FontFace: FontFaceMocker,
+      CanvasRenderingContext2D: CanvasRenderingContext2D,
     };
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('canvas-5-polyfill');
 
     for (const [key, value] of Object.entries(globals)) {
       Object.defineProperty(globalThis, key, {
