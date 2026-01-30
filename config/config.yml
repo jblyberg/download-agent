@@ -1,5 +1,7 @@
 ---
 excalidraw:
-  src_dir: "images/in"
-  dest_dir: "images/out"
-  svg_dir: "images/svg"
+  extension: ".excalidraw"
+  src_dir: "./images/in"
+  dest_dir: "./images/out"
+  png_dir: "./images/png"
+  svg_dir: "./images/svg"

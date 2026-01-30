@@ -2,38 +2,46 @@
 import { Injectable } from '@nestjs/common';
 import { JSDOM } from 'jsdom';
 import { FontFaceMocker } from './classes/FontFaceMocker';
-import { ExcalidrawHandler } from './FileTypeHandlers/ExcalidrawHandler';
 
 @Injectable()
 export class WatcherService {
-  constructor(private excalidrawHandler: ExcalidrawHandler) {
+  constructor() {
     const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
       pretendToBeVisual: true,
     });
 
-    globalThis.window = dom.window as any;
-    globalThis.document = dom.window.document;
-    globalThis.Node = dom.window.Node;
-    globalThis.Element = dom.window.Element;
-    globalThis.HTMLElement = dom.window.HTMLElement;
-    globalThis.devicePixelRatio = 1;
+    const globals = {
+      window: dom.window,
+      document: dom.window.document,
+      navigator: dom.window.navigator,
+      Element: dom.window.Element,
+      HTMLElement: dom.window.HTMLElement,
+      HTMLCanvasElement: dom.window.HTMLCanvasElement,
+      Node: dom.window.Node,
+      devicePixelRatio: 1,
+      FontFace: FontFaceMocker,
+    };
 
-    // Polyfill FontFace with the metadata Excalidraw's toCSS() needs
-    (globalThis as any).FontFace = FontFaceMocker;
+    for (const [key, value] of Object.entries(globals)) {
+      Object.defineProperty(globalThis, key, {
+        value,
+        writable: true,
+        configurable: true,
+      });
+    }
 
-    Object.defineProperty(globalThis.document, 'fonts', {
+    // Specifically fix the fonts property on the document
+    Object.defineProperty(dom.window.document, 'fonts', {
       value: {
-        load: async () => [],
-        check: () => true,
         add: () => {},
         addEventListener: () => {},
+        check: () => true,
+        has: () => true,
+        load: async () => [],
         removeEventListener: () => {},
       },
       writable: true,
+      configurable: true,
     });
-  }
-
-  onModuleInit() {
-    this.excalidrawHandler.register_watcher();
   }
 }

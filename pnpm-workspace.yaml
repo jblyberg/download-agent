@@ -1,3 +1,5 @@
 onlyBuiltDependencies:
   - '@nestjs/core'
+  - canvas
+  - sharp
   - unrs-resolver
