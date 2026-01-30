@@ -7,15 +7,27 @@
 
 FROM node:22-alpine AS builder
 
+# Install system libraries for canvas
+RUN apk add --no-cache \
+  python3 \
+  make \
+  g++ \
+  build-base \
+  cairo-dev \
+  pango-dev \
+  jpeg-dev \
+  giflib-dev \
+  librsvg-dev
+
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy Source
-COPY package.json tsconfig.json tsconfig.build.json pnpm-lock.yaml ./
+COPY package.json tsconfig.json tsconfig.build.json pnpm-lock.yaml .npmrc ./
 COPY src/ src/
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Generate the production build. The build script runs "nest build" to compile the application.
 RUN pnpm build
@@ -28,6 +40,13 @@ RUN pnpm prune --prod
 FROM node:22-alpine AS production
 
 WORKDIR /app
+
+RUN apk add --no-cache \
+  cairo \
+  pango \
+  jpeg \
+  giflib \
+  librsvg
 
 # Set to production environment
 ENV NODE_ENV=production
