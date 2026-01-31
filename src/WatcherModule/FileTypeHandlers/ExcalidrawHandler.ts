@@ -1,8 +1,12 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable, Logger } from '@nestjs/common';
 import { Resvg } from '@resvg/resvg-js';
+import { CanvasRenderingContext2D } from 'canvas';
 import chokidar, { FSWatcher } from 'chokidar';
+import { JSDOM } from 'jsdom';
 import fs from 'node:fs';
 import path from 'node:path';
+import { FontFaceMocker } from '../classes/FontFaceMocker';
 import { ConfigService } from '../ConfigService';
 import { IHandlerClass } from '../interfaces/IHandlerClass';
 import { IWatcherConfig } from '../interfaces/IWatcherConfig';
@@ -16,6 +20,48 @@ export class ExcalidrawHandler implements IHandlerClass {
   constructor(configService: ConfigService) {
     this.config = configService.watcherConfig.excalidraw;
     this.logger = new Logger(ExcalidrawHandler.name);
+
+    const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+      pretendToBeVisual: true,
+    });
+
+    const globals = {
+      window: dom.window,
+      document: dom.window.document,
+      navigator: dom.window.navigator,
+      Element: dom.window.Element,
+      HTMLElement: dom.window.HTMLElement,
+      HTMLCanvasElement: dom.window.HTMLCanvasElement,
+      Node: dom.window.Node,
+      devicePixelRatio: 1,
+      FontFace: FontFaceMocker,
+      CanvasRenderingContext2D: CanvasRenderingContext2D,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('canvas-5-polyfill'); // Provides Path2D inline
+
+    for (const [key, value] of Object.entries(globals)) {
+      Object.defineProperty(globalThis, key, {
+        value,
+        writable: true,
+        configurable: true,
+      });
+    }
+
+    // Specifically fix the fonts property on the document
+    Object.defineProperty(dom.window.document, 'fonts', {
+      value: {
+        add: () => {},
+        addEventListener: () => {},
+        check: () => true,
+        has: () => true,
+        load: async () => [],
+        removeEventListener: () => {},
+      },
+      writable: true,
+      configurable: true,
+    });
   }
 
   /**

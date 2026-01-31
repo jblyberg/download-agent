@@ -1,17 +1,14 @@
-import { IFontFaceDescriptors } from '../interfaces/IFontFaceDescriptors';
-
 export class FontFaceMocker {
   family: string;
   source: string | BufferSource;
-  // Make this Partial or match the interface exactly
   descriptors: FontFaceDescriptors;
 
   status: 'unloaded' | 'loading' | 'loaded' | 'error' = 'unloaded';
-  unicodeRange = '';
-  variant = 'normal';
-  featureSettings = 'normal';
-  variationSettings = 'normal';
-  display = 'auto';
+  // unicodeRange = '';
+  // variant = 'normal';
+  // featureSettings = 'normal';
+  // variationSettings = 'normal';
+  // display = 'auto';
 
   constructor(family: string, source: string | BufferSource, descriptors: FontFaceDescriptors = {}) {
     this.family = family;
