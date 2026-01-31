@@ -25,7 +25,7 @@ export class WatcherService {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('canvas-5-polyfill');
+    require('canvas-5-polyfill'); // Provides Path2D inline
 
     for (const [key, value] of Object.entries(globals)) {
       Object.defineProperty(globalThis, key, {

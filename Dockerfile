@@ -7,7 +7,6 @@
 
 FROM node:22-alpine AS builder
 
-# Install system libraries for canvas
 RUN apk add --no-cache \
   python3 \
   make \
@@ -22,14 +21,11 @@ RUN apk add --no-cache \
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy Source
 COPY package.json tsconfig.json tsconfig.build.json pnpm-lock.yaml .npmrc ./
 COPY src/ src/
 
-# Install dependencies
 RUN pnpm install
 
-# Generate the production build. The build script runs "nest build" to compile the application.
 RUN pnpm build
 RUN pnpm prune --prod
 
@@ -48,12 +44,21 @@ RUN apk add --no-cache \
   giflib \
   librsvg
 
-# Set to production environment
 ENV NODE_ENV=production
 
-# Copy only the necessary files
+COPY fonts fonts
 COPY --from=builder /app/dist dist
 COPY --from=builder /app/node_modules node_modules
 COPY --from=builder /app/package.json package.json
+
+USER root
+
+RUN mkdir -p /usr/share/fonts/truetype/custom
+COPY fonts/* /usr/share/fonts/truetype/custom/
+RUN chmod 644 /usr/share/fonts/truetype/custom/*
+
+RUN fc-cache -f
+
+USER 1000
 
 CMD ["npm", "run", "start:prod"]

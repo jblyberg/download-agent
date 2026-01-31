@@ -45,9 +45,9 @@ export class ExcalidrawHandler implements IHandlerClass {
 
       const outputPath = path.join(this.config.png_dir, `${baseName}.png`);
       await fs.promises.writeFile(outputPath, buffer);
-      this.logger.log(`✅ Binary PNG Created: ${baseName}.png`);
+      this.logger.log(`PNG: created: ${baseName}.png ✅`);
     } catch (error: any) {
-      this.logger.error(`❌ PNG Error: ${error.message}`);
+      this.logger.error(`PNG Error: ${error.message}`);
     }
   }
 
@@ -76,7 +76,7 @@ export class ExcalidrawHandler implements IHandlerClass {
       // Save SVG
       await fs.promises.writeFile(path.join(this.config.svg_dir, `${baseName}.svg`), svgElement.outerHTML);
 
-      this.logger.log(`Converted and Moved: ${fileName} ✅`);
+      this.logger.log(`SVG: created ${fileName} ✅`);
 
       return svgElement.outerHTML;
     } catch (error: any) {
