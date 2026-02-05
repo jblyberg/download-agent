@@ -79,10 +79,23 @@ export class ExcalidrawHandler implements IHandlerClass {
     const baseName = path.parse(fileName).name;
 
     try {
+      // 1. Calculate the bounding box with a temporary instance
+      const tempResvg = new Resvg(svgOuterHTML);
+      const bbox = tempResvg.getBBox();
+
+      if (!bbox) throw new Error('Could not calculate bounding box');
+
+      // 2. Map bbox (x, y, width, height) to crop (left, top, right, bottom)
       const resvg = new Resvg(svgOuterHTML, {
+        crop: {
+          left: bbox.x,
+          top: bbox.y,
+          right: bbox.x + bbox.width,
+          bottom: bbox.y + bbox.height,
+        },
         fitTo: {
           mode: 'zoom',
-          value: 2, // 2x scaling
+          value: 1,
         },
       });
 
@@ -91,7 +104,7 @@ export class ExcalidrawHandler implements IHandlerClass {
 
       const outputPath = path.join(this.config.png_dir, `${baseName}.png`);
       await fs.promises.writeFile(outputPath, buffer);
-      this.logger.log(`PNG: created: ${baseName}.png ✅`);
+      this.logger.log(`PNG created (trimmed): ${baseName}.png ✅`);
     } catch (error: any) {
       this.logger.error(`PNG Error: ${error.message}`);
     }
@@ -109,14 +122,16 @@ export class ExcalidrawHandler implements IHandlerClass {
       const { elements, appState, files } = JSON.parse(fileData);
 
       const svgElement = await exportToSvg({
-        elements,
+        // Only include elements that aren't deleted
+        elements: elements.filter((el: any) => !el.isDeleted),
         appState: {
           ...appState,
           viewBackgroundColor: 'transparent',
           exportBackground: false,
           exportWithDarkMode: true,
         },
-        files: files || {}, // Use empty object, not null
+        exportPadding: 50,
+        files: files || {},
       });
 
       // Save SVG
